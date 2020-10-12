@@ -15,7 +15,7 @@ import * as uuid from 'uuid'
 
 const docClient = new AWS.DynamoDB.DocumentClient()
 const todoTable = process.env.TODOS_TABLE
-const logger = createLogger('auth')
+const logger = createLogger('createTodo')
 
 export const handler = middy(async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   const newTodo: CreateTodoRequest = JSON.parse(event.body);
