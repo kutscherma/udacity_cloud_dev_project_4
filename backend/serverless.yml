@@ -3,7 +3,7 @@ service:
 
 plugins:
   - serverless-webpack
-#  - serverless-iam-roles-per-function
+  - serverless-iam-roles-per-function
 
 provider:
   name: aws
@@ -16,28 +16,29 @@ provider:
     TODOS_TABLE: Todo-${self:provider.stage}
     INDEX_NAME: TodoIdIndex
 
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - dynamodb:Scan
-        - dynamodb:PutItem
-        - dynamodb:GetItem
-      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
-
 functions:
 
 #  Auth:
 #    handler: src/lambda/auth/auth0Authorizer.handler
 #
-#  # TODO: Configure this function
-#  GetTodos:
-#    handler: src/lambda/http/getTodos.handler
-#    events:
-#      - http:
-#          method: get
-#          path: todos
-#          cors: true
 
+#  # TODO: Configure this function
+  GetTodos:
+    handler: src/lambda/http/getTodos.handler
+    events:
+      - http:
+          method: get
+          path: todos
+          cors: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Scan
+          - dynamodb:PutItem
+          - dynamodb:GetItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+
+#  # TODO: Configure this function
   CreateTodo:
     handler: src/lambda/http/createTodo.handler
     events:
@@ -45,6 +46,13 @@ functions:
           method: post
           path: todos
           cors: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Scan
+          - dynamodb:PutItem
+          - dynamodb:GetItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
 
 #  # TODO: Configure this function
 #  UpdateTodo:
