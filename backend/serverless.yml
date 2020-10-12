@@ -36,6 +36,12 @@ functions:
         Action:
           - dynamodb:Scan
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+      - Effect: Allow
+        Action:
+          - logs:PutLogEvents
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+        Resource: arn:aws:logs:us-east-1:*:*
 
 #  # TODO: Configure this function
   CreateTodo:
@@ -53,6 +59,12 @@ functions:
           - dynamodb:PutItem
           - dynamodb:GetItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+      - Effect: Allow
+        Action:
+          - logs:PutLogEvents
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+        Resource: arn:aws:logs:us-east-1:*:*
 
 #  # TODO: Configure this function
 #  UpdateTodo:

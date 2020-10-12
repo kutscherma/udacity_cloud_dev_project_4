@@ -11,9 +11,15 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
 
       console.log(event);
 
+      let userId = 'Manuel'
+
       const toDoItem = await docClient.scan({
-                                    TableName: todoTable
-                                  }).promise();
+                                    TableName: todoTable,
+                                    FilterExpression: 'contains(userId, :userId)',
+                                    ExpressionAttributeValues: {
+                                            ":userId": userId
+                                    }
+                              }).promise();
 
       return {
           statusCode: 200,
