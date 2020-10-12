@@ -9,6 +9,7 @@ import { CreateTodoRequest } from '../../requests/CreateTodoRequest'
 import { TodoItem } from '../../models/TodoItem'
 
 import { createLogger } from '../../utils/logger'
+import { getUserId } from '../utils'
 
 import * as AWS  from 'aws-sdk'
 import * as uuid from 'uuid'
@@ -18,15 +19,13 @@ const todoTable = process.env.TODOS_TABLE
 const logger = createLogger('createTodo')
 
 export const handler = middy(async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  const newTodo: CreateTodoRequest = JSON.parse(event.body);
-  logger.info('Processing event: ', newTodo);
-
-  const itemId = uuid.v4();
+  const newTodo: CreateTodoRequest = JSON.parse(event.body)
+  logger.info('Processing event: ', newTodo)
 
   const todo: TodoItem = {
-    userId: 'Judith',   // retrieve from jwt
-    todoId: itemId,
-    createdAt: '',
+    userId: getUserId(event),   // retrieve from jwt
+    todoId: uuid.v4(),
+    createdAt: new Date().toISOString(),
     name: newTodo.name,
     dueDate: newTodo.dueDate,
     done: false
