@@ -30,12 +30,11 @@ functions:
           method: get
           path: todos
           cors: true
+    iamRoleStatementsName: GetToDoRole
     iamRoleStatements:
       - Effect: Allow
         Action:
           - dynamodb:Scan
-          - dynamodb:PutItem
-          - dynamodb:GetItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
 
 #  # TODO: Configure this function
@@ -46,6 +45,7 @@ functions:
           method: post
           path: todos
           cors: true
+    iamRoleStatementsName: CreateToDoRole
     iamRoleStatements:
       - Effect: Allow
         Action:
