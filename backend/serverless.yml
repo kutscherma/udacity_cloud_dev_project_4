@@ -36,6 +36,7 @@ functions:
 #      - http:
 #          method: get
 #          path: todos
+#          cors: true
 
   CreateTodo:
     handler: src/lambda/http/createTodo.handler
