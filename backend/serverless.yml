@@ -13,7 +13,7 @@ provider:
   region: ${opt:region, 'us-east-1'}
 
   environment:
-    TODOS_TABLE: Todo-${self:provider.stage}
+    TODOS_TABLE: jf-Todo-${self:provider.stage}
     INDEX_NAME: TodoIdIndex
     SIGNED_URL_EXPIRATION: 300
     AUTH_0_SECRET_ID: Auth0Secret-${self:provider.stage}
@@ -69,9 +69,9 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
+          - dynamodb:GetItem
           - dynamodb:Scan
           - dynamodb:PutItem
-          - dynamodb:GetItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
       - Effect: Allow
         Action:
@@ -87,15 +87,29 @@ functions:
 #      - http:
 #          method: patch
 #          path: todos/{todoId}
-#
-#  # TODO: Configure this function
-#  DeleteTodo:
-#    handler: src/lambda/http/deleteTodo.handler
-#    events:
-#      - http:
-#          method: delete
-#          path: todos/{todoId}
-#
+
+  DeleteTodo:
+    handler: src/lambda/http/deleteTodo.handler
+    events:
+      - http:
+          method: delete
+          path: todos/{todoId}
+          cors: true
+          authorizer: Auth
+    iamRoleStatementsName: DeleteToDoRole
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:DeleteItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+      - Effect: Allow
+        Action:
+          - logs:PutLogEvents
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+        Resource: arn:aws:logs:us-east-1:*:*
+
 #  # TODO: Configure this function
 #  GenerateUploadUrl:
 #    handler: src/lambda/http/generateUploadUrl.handler
@@ -110,11 +124,15 @@ resources:
       Type: AWS::DynamoDB::Table
       Properties:
         AttributeDefinitions:
+          - AttributeName: userId
+            AttributeType: S
           - AttributeName: todoId
             AttributeType: S
         KeySchema:
-          - AttributeName: todoId
+          - AttributeName: userId
             KeyType: HASH
+          - AttributeName: todoId
+            KeyType: RANGE
         BillingMode: PAY_PER_REQUEST
         TableName: ${self:provider.environment.TODOS_TABLE}
 

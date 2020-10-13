@@ -9,5 +9,8 @@ import { JwtPayload } from './JwtPayload'
  */
 export function parseUserId(jwtToken: string): string {
   const decodedJwt = decode(jwtToken) as JwtPayload
+  const subAuth0 = 'auth0|'
+  if(decodedJwt.sub.startsWith(subAuth0))
+    return decodedJwt.sub.substring(subAuth0.length, decodedJwt.sub.length)
   return decodedJwt.sub
 }
