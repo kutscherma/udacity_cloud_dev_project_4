@@ -13,13 +13,24 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
 
       let userId = 'Manuel'
 
-      const toDoItem = await docClient.scan({
-                                    TableName: todoTable,
-                                    FilterExpression: 'contains(userId, :userId)',
-                                    ExpressionAttributeValues: {
-                                            ":userId": userId
-                                    }
-                              }).promise();
+//       var params = {
+//              TableName: todoTable,
+//              FilterExpression: 'contains(userId, :userId)',
+//              ExpressionAttributeValues: {
+//              ":userId": userId
+//              }
+//       };
+
+
+      var params = {
+            KeyConditionExpression: 'userId = :userId',
+            ExpressionAttributeValues: {
+                ':userId': {'S': userId}
+            },
+            TableName: todoTable
+      };
+
+      const toDoItem = await docClient.query(params).promise();
 
       return {
           statusCode: 200,
