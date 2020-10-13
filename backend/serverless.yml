@@ -3,7 +3,7 @@ service:
 
 plugins:
   - serverless-webpack
-#  - serverless-iam-roles-per-function
+  - serverless-iam-roles-per-function
 
 provider:
   name: aws
