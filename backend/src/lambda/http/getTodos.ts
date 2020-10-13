@@ -1,4 +1,3 @@
-
 import 'source-map-support/register'
 //
 import { APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayProxyHandler } from 'aws-lambda'
@@ -8,10 +7,11 @@ const docClient = new AWS.DynamoDB.DocumentClient()
 const todoTable = process.env.TODOS_TABLE
 //
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  console.log(event);
 
-      console.log(event);
+  console.log(event);
 
-      let userId = 'Manuel'
+  let userId = 'Manuel'
 
 //       var params = {
 //              TableName: todoTable,
@@ -22,24 +22,23 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
 //       };
 
 
-      var params = {
-            KeyConditionExpression: 'userId = :userId',
-            ExpressionAttributeValues: {
-                ':userId': {'S': userId}
-            },
-            TableName: todoTable
-      };
+  var params = {
+        KeyConditionExpression: 'userId = :userId',
+        ExpressionAttributeValues: {
+            ':userId': {'S': userId}
+        },
+        TableName: todoTable
+  };
 
-      const toDoItem = await docClient.query(params).promise();
+  const toDoItem = await docClient.query(params).promise();
 
-      return {
-          statusCode: 200,
-          headers: {
-            'Access-Control-Allow-Origin': '*'
-          },
-          body: JSON.stringify({
-            toDoItem
-          })
-        }
-
+  return {
+      statusCode: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*'
+      },
+      body: JSON.stringify({
+        toDoItem
+      })
+    }
 }
