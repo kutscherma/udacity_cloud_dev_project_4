@@ -47,6 +47,7 @@ functions:
           method: get
           path: todos
           cors: true
+          authorizer: Auth
 
   CreateTodo:
     handler: src/lambda/http/createTodo.handler
