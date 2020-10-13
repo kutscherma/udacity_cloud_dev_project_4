@@ -16,9 +16,9 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
     const userId = getUserId(event)
     const updatedTodo: UpdateTodoRequest = JSON.parse(event.body)
 
-    logger.info('Event: ', event)
-    logger.info('To be updated: ', updatedTodo)
-    logger.info('Updating a todo with id: ', todoId)
+    logger.info(`Event: ${JSON.stringify(event)}`)
+    logger.info(`To be updated: ${updatedTodo}`)
+    logger.info(`Updating a todo with id: ${todoId}`)
 
     const params = {
         TableName: todoTable,
@@ -36,7 +36,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
     }
 
     const result = docClient.update(params).promise()
-    logger.info('Updated todo: ', result)
+    logger.info(`Updated todo: ${result}`)
 
     return {
         statusCode: 200,
