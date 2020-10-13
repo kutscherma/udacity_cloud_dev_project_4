@@ -19,26 +19,21 @@ provider:
     AUTH_0_SECRET_ID: Auth0Secret-${self:provider.stage}
     AUTH_0_SECRET_FIELD: auth0Secret
 
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - dynamodb:Scan
-        - dynamodb:PutItem
-        - dynamodb:GetItem
-      Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
-    - Effect: Allow
-      Action:
-        - secretsmanager:GetSecretValue
-      Resource: !Ref Auth0Secret
-    - Effect: Allow
-      Action:
-        - kms:Decrypt
-      Resource: !GetAtt KMSKey.Arn
 
 functions:
 
   Auth:
     handler: src/lambda/auth/auth0Authorizer.handler
+    iamRoleStatementsName: AuthRole
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - secretsmanager:GetSecretValue
+        Resource: !Ref Auth0Secret
+      - Effect: Allow
+        Action:
+          - kms:Decrypt
+        Resource: !GetAtt KMSKey.Arn
 
   GetTodos:
     handler: src/lambda/http/getTodos.handler
@@ -48,6 +43,19 @@ functions:
           path: todos
           cors: true
           authorizer: Auth
+    iamRoleStatementsName: GetToDoRole
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Scan
+          - dynamodb:Query
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+      - Effect: Allow
+        Action:
+          - logs:PutLogEvents
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+        Resource: arn:aws:logs:us-east-1:*:*
 
   CreateTodo:
     handler: src/lambda/http/createTodo.handler
@@ -57,6 +65,20 @@ functions:
           path: todos
           cors: true
           authorizer: Auth
+    iamRoleStatementsName: CreateToDoRole
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Scan
+          - dynamodb:PutItem
+          - dynamodb:GetItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
+      - Effect: Allow
+        Action:
+          - logs:PutLogEvents
+          - logs:CreateLogGroup
+          - logs:CreateLogStream
+        Resource: arn:aws:logs:us-east-1:*:*
 
 #  # TODO: Configure this function
 #  UpdateTodo:
