@@ -20,7 +20,7 @@ const logger = createLogger('createTodo')
 
 export const handler = middy(async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   const newTodo: CreateTodoRequest = JSON.parse(event.body)
-  logger.info('Processing event: ', newTodo)
+  logger.info(`Processing event: ${newTodo}`)
 
   const todo: TodoItem = {
     userId: getUserId(event),   // retrieve from jwt
@@ -31,8 +31,8 @@ export const handler = middy(async (event: APIGatewayProxyEvent): Promise<APIGat
     done: false
   }
 
-  logger.info('Info Table: ', todoTable);
-  logger.info('Todo Item: ', todo);
+  logger.info(`Info Table: ${todoTable}`);
+  logger.info(`Todo Item: ${todo}`);
 
   await docClient.put({
     TableName: todoTable,
