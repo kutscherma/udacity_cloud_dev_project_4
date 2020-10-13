@@ -1,35 +1,38 @@
 import 'source-map-support/register'
 
-import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
+import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda'
+
+import * as middy from 'middy'
+import { cors } from 'middy/middlewares'
 
 import { CreateTodoRequest } from '../../requests/CreateTodoRequest'
 import { TodoItem } from '../../models/TodoItem'
 
+import { createLogger } from '../../utils/logger'
+import { getUserId } from '../utils'
 
 import * as AWS  from 'aws-sdk'
 import * as uuid from 'uuid'
 
 const docClient = new AWS.DynamoDB.DocumentClient()
 const todoTable = process.env.TODOS_TABLE
+const logger = createLogger('createTodo')
 
-
-export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  const newTodo: CreateTodoRequest = JSON.parse(event.body);
-  console.log('Processing event: ', newTodo);
-
-  const itemId = uuid.v4();
+export const handler = middy(async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  const newTodo: CreateTodoRequest = JSON.parse(event.body)
+  logger.info('Processing event: ', newTodo)
 
   const todo: TodoItem = {
-    userId: 'Judith',   // retrieve from jwt
-    todoId: itemId,
-    createdAt: '',
+    userId: getUserId(event),   // retrieve from jwt
+    todoId: uuid.v4(),
+    createdAt: new Date().toISOString(),
     name: newTodo.name,
     dueDate: newTodo.dueDate,
     done: false
   }
 
-  console.log('Info Table: ', todoTable);
-  console.log('Todo Item: ', todo);
+  logger.info('Info Table: ', todoTable);
+  logger.info('Todo Item: ', todo);
 
   await docClient.put({
     TableName: todoTable,
@@ -45,4 +48,10 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
       todo
     })
   }
-}
+})
+
+handler.use(
+    cors({
+      credentials: true
+    })
+)
