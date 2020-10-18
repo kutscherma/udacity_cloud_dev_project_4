@@ -15,7 +15,7 @@ provider:
   region: ${opt:region, 'us-east-1'}
 
   environment:
-    TODOS_TABLE: jf-Todo-${self:provider.stage}
+    TODOS_TABLE: Todo-${self:provider.stage}
     INDEX_NAME: TodoIdIndex
     SIGNED_URL_EXPIRATION: 300
     AUTH_0_SECRET_ID: Auth0Secret-${self:provider.stage}
@@ -31,10 +31,10 @@ custom:
     models:
       - name: CreateTodoRequest
         contentType: application/json
-        schema: ${file(src/schema/CreateTodo.json)}
+        schema: ${file(src/utils/schema/CreateTodo.json)}
       - name: UpdateTodoRequest
         contentType: application/json
-        schema: ${file(src/schema/UpdateTodo.json)}
+        schema: ${file(src/utils/schema/UpdateTodo.json)}
 
 functions:
   Auth:
