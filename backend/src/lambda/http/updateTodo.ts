@@ -26,16 +26,21 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
             'userId': userId,
             'todoId': todoId
         },
-        UpdateExpression: "set name = :name, dueDate= :due, done = :done",
-        ExpressionAttributeValues:{
-            ":name":updatedTodo.name,
-            ":due":updatedTodo.dueDate,
-            ":done":updatedTodo.done
+        UpdateExpression: 'set #name = :name, #dueDate = :due, #done= :d',
+        ExpressionAttributeValues: {
+            ':name' : updatedTodo.name,
+            ':due': updatedTodo.dueDate,
+            ':d': updatedTodo.done
         },
-        ReturnValues:"UPDATED_NEW"
+        ExpressionAttributeNames: {
+            '#name': 'name',
+            '#dueDate': 'dueDate',
+            '#done': 'done'
+        },
+        ReturnValues:'UPDATED_NEW'
     }
 
-    const result = docClient.update(params).promise()
+    const result = await docClient.update(params).promise()
     logger.info(`Updated todo: ${result}`)
 
     return {
