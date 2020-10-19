@@ -4,6 +4,8 @@ service:
 plugins:
   - serverless-webpack
   - serverless-iam-roles-per-function
+  - serverless-aws-documentation
+  - serverless-reqvalidator-plugin
 
 provider:
   name: aws
@@ -13,15 +15,28 @@ provider:
   region: ${opt:region, 'us-east-1'}
 
   environment:
-    TODOS_TABLE: jf-Todo-${self:provider.stage}
+    TODOS_TABLE: Todo-${self:provider.stage}
     INDEX_NAME: TodoIdIndex
     SIGNED_URL_EXPIRATION: 300
     AUTH_0_SECRET_ID: Auth0Secret-${self:provider.stage}
     AUTH_0_SECRET_FIELD: auth0Secret
 
+custom:
+  documentation:
+    api:
+      info:
+        version: v1.0.0
+        title: TODO API
+        description: Simple TODO application
+    models:
+      - name: CreateTodoRequest
+        contentType: application/json
+        schema: ${file(src/utils/schema/CreateTodo.json)}
+      - name: UpdateTodoRequest
+        contentType: application/json
+        schema: ${file(src/utils/schema/UpdateTodo.json)}
 
 functions:
-
   Auth:
     handler: src/lambda/auth/auth0Authorizer.handler
     iamRoleStatementsName: AuthRole
@@ -47,7 +62,6 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
-          - dynamodb:Scan
           - dynamodb:Query
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
       - Effect: Allow
@@ -65,12 +79,18 @@ functions:
           path: todos
           cors: true
           authorizer: Auth
+          reqValidatorName: ReqValAll
+          documentation:
+            summary: Create Todo Item
+            description: Create Todo Item
+            requestBody:
+              description: Parameter to create Todo Item
+            requestModels:
+              application/json: CreateTodoRequest
     iamRoleStatementsName: CreateToDoRole
     iamRoleStatements:
       - Effect: Allow
         Action:
-          - dynamodb:GetItem
-          - dynamodb:Scan
           - dynamodb:PutItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
       - Effect: Allow
@@ -88,13 +108,18 @@ functions:
           path: todos/{todoId}
           cors: true
           authorizer: Auth
+          reqValidatorName: ReqValAll
+          documentation:
+            summary: Update Todo Item
+            description: Update Todo Item
+            requestBody:
+              description: Parameter to update Todo Item
+            requestModels:
+              application/json: UpdateTodoRequest
     iamRoleStatementsName: UpdateToDoRole
     iamRoleStatements:
       - Effect: Allow
         Action:
-          - dynamodb:GetItem
-          - dynamodb:Scan
-          - dynamodb:PutItem
           - dynamodb:UpdateItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
       - Effect: Allow
@@ -116,7 +141,6 @@ functions:
     iamRoleStatements:
       - Effect: Allow
         Action:
-          - dynamodb:GetItem
           - dynamodb:DeleteItem
         Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODOS_TABLE}
       - Effect: Allow
@@ -185,3 +209,12 @@ resources:
         Name: ${self:provider.environment.AUTH_0_SECRET_ID}
         Description: Auth0 secret
         KmsKeyId: !Ref KMSKey
+
+    ReqValAll:
+      Type: AWS::ApiGateway::RequestValidator
+      Properties:
+        Name: all
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        ValidateRequestBody: true
+        ValidateRequestParameters: true
