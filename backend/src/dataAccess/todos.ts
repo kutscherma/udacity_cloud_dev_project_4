@@ -1,15 +1,24 @@
 import * as AWS  from 'aws-sdk'
 
+
+
 import { TodoItem } from '../models/TodoItem'
 import { TodoUpdate } from '../models/TodoUpdate'
 
 import { createLogger } from '../utils/logger'
 
+const s3 = new AWS.S3({
+    signatureVersion: 'v4'
+})
+const bucketName = process.env.IMAGES_S3_BUCKET
+const urlExpiration = process.env.SIGNED_URL_EXPIRATION
+
 export class Todos {
     constructor(
         private readonly docClient = new AWS.DynamoDB.DocumentClient(),
+        private readonly logger = createLogger('dataAccess_todos'),
         private readonly todosTable = process.env.TODOS_TABLE,
-        private readonly logger = createLogger('dataAccess_todos')
+        private readonly indexName = process.env.INDEX_NAME
     ) {}
 
     async createTodo(todoItem: TodoItem): Promise<TodoItem> {
@@ -39,6 +48,7 @@ export class Todos {
     async getTodos(userId: string): Promise<TodoItem[]> {
         const todos = await this.docClient.query({
             TableName: this.todosTable,
+            IndexName: this.indexName,
             KeyConditionExpression: 'userId = :userId',
             ExpressionAttributeValues: {
                 ':userId':  userId
@@ -73,4 +83,34 @@ export class Todos {
         return result.Attributes as TodoItem
     }
 
+    async getUploadUrl(todoId: string, userId: string) {
+        await this.attachImageURLToTodo(todoId, userId)
+        const uploadUrl = this.getPreSignedUploadUrl(todoId)
+        return uploadUrl
+    }
+
+    async attachImageURLToTodo(todoId: string, userId: string) {
+        const params = {
+            TableName: this.todosTable,
+            Key: {
+                userId: userId,
+                todoId: todoId
+            },
+            UpdateExpression: 'set attachmentUrl = :attachmentUrl',
+            ExpressionAttributeValues: {
+                ':attachmentUrl': `https://${bucketName}.s3.amazonaws.com/${todoId}`
+            },
+            ReturnValues: 'ALL_NEW'
+        }
+
+        await this.docClient.update(params).promise()
+    }
+
+    getPreSignedUploadUrl(imageId: string) {
+        return s3.getSignedUrl('putObject', {
+            Bucket: bucketName,
+            Key: imageId,
+            Expires: urlExpiration
+        })
+    }
 }

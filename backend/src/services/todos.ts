@@ -28,6 +28,10 @@ export  async function getTodos( userId: string ): Promise<TodoItem[]> {
     return await todosDB.getTodos(userId)
 }
 
+export async function getUploadUrl(todoId: string, userId: string): Promise<any> {
+    return await todosDB.getUploadUrl(todoId, userId)
+}
+
 export async function updateTodo( todoId: string, userId: string, updateTodoRequest: UpdateTodoRequest): Promise<TodoItem> {
     return await todosDB.updateTodo(todoId, userId, updateTodoRequest as TodoUpdate)
 }
