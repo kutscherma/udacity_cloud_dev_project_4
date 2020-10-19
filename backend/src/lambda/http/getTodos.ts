@@ -10,15 +10,15 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
     logger.info(event)
     logger.info(`userId: ${getUserId(event)}`)
 
-    const todoItems = await getTodos(getUserId(event))
+    const items = await getTodos(getUserId(event))
 
-    logger.info(`Search result ${JSON.stringify(todoItems)}`);
+    logger.info(`Search result ${JSON.stringify(items)}`);
 
     return {
         statusCode: 200,
         headers: {
             'Access-Control-Allow-Origin': '*'
         },
-        body: JSON.stringify(todoItems)
+        body: JSON.stringify({ items })
     }
 }

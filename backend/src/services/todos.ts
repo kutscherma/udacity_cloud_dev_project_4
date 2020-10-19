@@ -2,6 +2,7 @@ import * as uuid from 'uuid'
 
 import { Todos } from '../dataAccess/todos'
 import { TodoItem } from '../models/TodoItem'
+import { TodoUpdate } from "../models/TodoUpdate";
 import { CreateTodoRequest } from '../requests/CreateTodoRequest'
 import { UpdateTodoRequest } from '../requests/UpdateTodoRequest'
 
@@ -27,6 +28,6 @@ export  async function getTodos( userId: string ): Promise<TodoItem[]> {
     return await todosDB.getTodos(userId)
 }
 
-export async function updateTodo( userId: string, todoId: string, updateTodoRequest: UpdateTodoRequest): Promise<TodoItem> {
-    return await todosDB.updateTodo(todoId, userId, updateTodoRequest)
+export async function updateTodo( todoId: string, userId: string, updateTodoRequest: UpdateTodoRequest): Promise<TodoItem> {
+    return await todosDB.updateTodo(todoId, userId, updateTodoRequest as TodoUpdate)
 }
