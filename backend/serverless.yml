@@ -9,7 +9,7 @@ plugins:
 
 provider:
   name: aws
-  runtime: nodejs10.x
+  runtime: nodejs12.x
 
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'us-east-1'}
@@ -20,7 +20,7 @@ provider:
     SIGNED_URL_EXPIRATION: 300
     AUTH_0_SECRET_ID: Auth0Secret-${self:provider.stage}
     AUTH_0_SECRET_FIELD: auth0Secret
-    IMAGES_S3_BUCKET: udc-cd-p4-todo-images
+    IMAGES_S3_BUCKET: ms-udc-cd-p4-todo-images
 
   iamRoleStatements:
     - Effect: Allow
